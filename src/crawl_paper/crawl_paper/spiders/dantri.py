@@ -61,20 +61,18 @@ class DantriSpider(scrapy.Spider):
         # make folder
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
-
+            
         if category in CATEGORIES: # highly recommend 
             category_path = os.path.join(self.folder_path, CATEGORIES[category])
             if not os.path.exists(category_path):
                 os.makedirs(category_path)
             self.start_urls = [URL + category + '.htm']
-
         elif category == 'get_all': # a lot of requests are coming to the server so this value of argument is not highly recommended
             for CATEGORIE in CATEGORIES:
                 category_path = os.path.join(self.folder_path, CATEGORIES[CATEGORIE])
                 if not os.path.exists(category_path):
                     os.makedirs(category_path)
-                self.start_urls.append(URL + CATEGORIE + '.htm')
-        
+                self.start_urls.append(URL + CATEGORIE + '.htm')  
         else:
             raise ValueError(f'{category} is not a valid value for category')
 
@@ -103,7 +101,7 @@ class DantriSpider(scrapy.Spider):
         category = response.url.split('/')[-2]
         CATEGORIES_COUNTER[category] = CATEGORIES_COUNTER[category] + 1
         filename = '%s/%s-%s.json' % (CATEGORIES[category], CATEGORIES[category], CATEGORIES_COUNTER[category])
-        with open(self.folder_path + "/" + filename, 'w', encoding = 'utf-8') as fp:
+        with open(self.folder_path + "/" + filename, 'w', encoding='utf-8') as fp:
             json.dump(json_data, fp, ensure_ascii=False)
             self.log('Saved file %s' % filename)
 
