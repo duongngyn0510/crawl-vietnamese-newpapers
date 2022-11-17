@@ -52,7 +52,7 @@ CATEGORIES_COUNTER = {
 class DantriSpider(scrapy.Spider):
     name = 'dantri'
     allowed_domains = ['dantri.com.vn']
-    folder_path = 'raw_dantri'
+    folder_path = './raw_data/raw_dantri'
     start_urls = []
 
     def __init__(self, category, *args, **kwargs):
@@ -67,12 +67,14 @@ class DantriSpider(scrapy.Spider):
             if not os.path.exists(category_path):
                 os.makedirs(category_path)
             self.start_urls = [URL + category + '.htm']
+
         elif category == 'get_all': # a lot of requests are coming to the server so this value of argument is not highly recommended
             for CATEGORIE in CATEGORIES:
                 category_path = os.path.join(self.folder_path, CATEGORIES[CATEGORIE])
                 if not os.path.exists(category_path):
                     os.makedirs(category_path)
                 self.start_urls.append(URL + CATEGORIE + '.htm')  
+
         else:
             raise ValueError(f'{category} is not a valid value for category')
 
@@ -93,7 +95,7 @@ class DantriSpider(scrapy.Spider):
             yield scrapy.Request(url="https://dantri.com.vn" + next_page, callback=self.parse)
         except:
             pass
-    
+        
     def parse_news(self, response):
         json_data = self.extract_news(response)
         yield json_data
