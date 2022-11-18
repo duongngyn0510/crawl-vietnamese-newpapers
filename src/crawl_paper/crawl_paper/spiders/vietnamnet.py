@@ -45,6 +45,7 @@ class VietnamnetSpider(scrapy.Spider):
     folder_path = './raw_data/raw_vietnamnet'
     page_limit = None
     crr_page = 0
+    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
     start_urls = []
 
     def __init__(self, category, limit=None, *args, **kwargs):
@@ -81,8 +82,12 @@ class VietnamnetSpider(scrapy.Spider):
         category = response.request.meta['category']      
         articles = response.xpath("//div[@class='feature-box__content']")
         for article in articles:
-            time.sleep(0.1) 
-            url = "https://vietnamnet.vn" + article.xpath(".//h3/a[1]/@href").get()
+            time.sleep(0.1)
+            url = article.xpath(".//h3/a[1]/@href").get()
+            if 'https://vietnamnet.vn' in url:
+                url = url
+            else:
+                url = "https://vietnamnet.vn" + url
             title = article.xpath("normalize-space(.//h3/a[1]/text())").get()
             abstract = article.xpath('normalize-space(.//div[2]/text())').get()
             yield scrapy.Request(url=url, callback=self.parse_news, meta={'title': title, 'abstract': abstract, 'category': category})
@@ -110,28 +115,6 @@ class VietnamnetSpider(scrapy.Spider):
                     yield scrapy.Request(url="https://vietnamnet.vn" + next_page, callback=self.parse, meta={'category': category})     
         except:
             pass
-
-        # category = response.request.meta['category']      
-        # articles = response.xpath("//div[@class='feature-box__content']")
-        # for article in articles:
-        #     time.sleep(0.1) 
-        #     url = "https://vietnamnet.vn" + article.xpath(".//h3/a[1]/@href").get()
-        #     title = article.xpath("normalize-space(.//h3/a[1]/text())").get()
-        #     abstract = article.xpath('normalize-space(.//div[2]/text())').get()
-        #     yield response.follow(url=url, callback=self.parse_news, meta={'title': title, 'category': category, 'abstract': abstract})
-       
-        # try:
-        #     next_page = response.xpath("//div[@class='panination__content']/a[last()]/@href").get()
-        #     time.sleep(0.1)
-        #     if next_page is not None:
-        # #       CATEGORIES_COUNTER[category][1] = CATEGORIES_COUNTER[category][1] + 1
-        #         if 'https://vietnamnet.vn' in next_page:
-        #             yield scrapy.Request(url=next_page, callback=self.parse, meta={'category': category})
-        #         else:
-        #             yield scrapy.Request(url="https://vietnamnet.vn" + next_page, callback=self.parse, meta={'category': category}, dont_filter=True)     
-        # except:
-        #     pass
-
 
     def parse_news(self, response):
         category = response.request.meta['category']    
